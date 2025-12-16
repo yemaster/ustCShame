@@ -29,7 +29,7 @@ jobs:
 
           function walk(dir) {
             return fs.readdirSync(dir, { withFileTypes: true })
-              .filter(d => !['.git', '.github'].includes(d.name))
+              .filter(d => !['.git', '.github', 'dist'].includes(d.name))
               .map(d => {
                 const full = path.join(dir, d.name);
                 return d.isDirectory()
