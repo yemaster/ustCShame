@@ -1,30 +1,28 @@
-name: Build GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Generate file tree
+      - name: Generate site
         run: |
+          mkdir dist
+          rsync -av --exclude='.git' --exclude='.github' ./ dist/
+
           node << 'EOF'
           const fs = require('fs');
           const path = require('path');
@@ -40,27 +38,25 @@ jobs:
               });
           }
 
-          const tree = walk('.');
-          fs.writeFileSync('tree.json', JSON.stringify(tree, null, 2));
+          const tree = walk('dist');
+          fs.writeFileSync('dist/tree.json', JSON.stringify(tree, null, 2));
           EOF
 
-      - name: Prepare pages branch
-        run: |
-          mkdir /tmp/pages
-          rsync -av --exclude='.git' --exclude='.github' ./ /tmp/pages/
+          cp .github/pages/index.html dist/index.html
 
-      - name: Copy index.html
-        run: |
-          cp .github/pages/index.html /tmp/pages/index.html
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
 
-      - name: Deploy to pages branch
-        run: |
-          cd /tmp/pages
-          git init
-          git branch -M pages
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add .
-          git commit -m "Deploy pages"
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push -f origin pages
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
