@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>云盘</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { font-family: sans-serif; display: flex; }
+    #tree { width: 300px; border-right: 1px solid #ddd; padding: 10px; }
+    #content { padding: 20px; flex: 1; }
+    a { cursor: pointer; display: block; margin: 4px 0; }
+  </style>
+</head>
+<body>
+
+<div id="tree"></div>
+<div id="content">选择一个文件</div>
+
+<script>
+async function loadTree() {
+  const res = await fetch('tree.json');
+  const tree = await res.json();
+  renderTree(tree, document.getElementById('tree'), '');
+}
+
+function renderTree(nodes, container, base) {
+  nodes.forEach(n => {
+    const el = document.createElement('a');
+    el.textContent = n.name;
+
+    const path = base + n.name;
+
+    if (n.type === 'dir') {
+      el.onclick = () => {
+        const div = document.createElement('div');
+        div.style.marginLeft = '15px';
+        renderTree(n.children, div, path + '/');
+        container.appendChild(div);
+      };
+    } else {
+      el.onclick = () => openFile(path);
+    }
+
+    container.appendChild(el);
+  });
+}
+
+async function openFile(path) {
+  if (path.toLowerCase().endsWith('readme.md')) {
+    const text = await fetch(path).then(r => r.text());
+    document.getElementById('content').innerHTML = marked.parse(text);
+  } else {
+    document.getElementById('content').innerHTML =
+      `<a href="${path}" target="_blank">下载 / 打开文件</a>`;
+  }
+}
+
+loadTree();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+name: Build GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate file tree
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          function walk(dir) {
+            return fs.readdirSync(dir, { withFileTypes: true })
+              .filter(d => !['.git', '.github'].includes(d.name))
+              .map(d => {
+                const full = path.join(dir, d.name);
+                return d.isDirectory()
+                  ? { name: d.name, type: 'dir', children: walk(full) }
+                  : { name: d.name, type: 'file' };
+              });
+          }
+
+          const tree = walk('.');
+          fs.writeFileSync('tree.json', JSON.stringify(tree, null, 2));
+          EOF
+
+      - name: Prepare pages branch
+        run: |
+          mkdir /tmp/pages
+          rsync -av --exclude='.git' --exclude='.github' ./ /tmp/pages/
+
+      - name: Copy index.html
+        run: |
+          cp .github/pages/index.html /tmp/pages/index.html
+
+      - name: Deploy to pages branch
+        run: |
+          cd /tmp/pages
+          git init
+          git branch -M pages
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Deploy pages"
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push -f origin pages
