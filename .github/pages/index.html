@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>云盘文件浏览</title>
+  <title>ustCShame</title> <!-- 修改：网页标题 -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
   <style>
@@ -12,33 +12,48 @@
       --hover-bg: #f6f8fa;
       --border-color: #e1e4e8;
       --text-secondary: #586069;
+      --bg-color: #f6f8fa;
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background-color: #f6f8fa;
+      background-color: var(--bg-color);
       color: #24292e;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       min-height: 100vh;
     }
 
+    /* === 新增：页面头部 === */
+    .page-header {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .page-title {
+      font-size: 32px;
+      font-weight: 300;
+      color: #24292e;
+      margin: 0;
+    }
+
     .container {
-      width: 100%;
-      max-width: 900px;
+      width: 90%;
+      max-width: 980px;
       background: white;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
-      height: fit-content;
       min-height: 500px;
+      margin-bottom: 20px;
     }
 
-    /* === 顶部栏 (面包屑 + 搜索) === */
+    /* === 顶部工具栏 === */
     .header {
       padding: 12px 16px;
       background: #fcfcfc;
@@ -49,7 +64,6 @@
       gap: 15px;
     }
 
-    /* 面包屑 */
     .breadcrumb-container {
       font-size: 14px;
       font-weight: 600;
@@ -63,15 +77,14 @@
     .breadcrumb-item:hover { text-decoration: underline; }
     .breadcrumb-separator { margin: 0 5px; color: #999; }
 
-    /* 搜索框 */
     .search-wrapper { position: relative; width: 250px; }
     .search-input {
       width: 100%; padding: 6px 12px; border: 1px solid var(--border-color);
-      border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box; transition: all 0.2s;
+      border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box;
     }
     .search-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3); }
 
-    /* === 文件列表样式 === */
+    /* === 列表内容 === */
     .file-list { list-style: none; margin: 0; padding: 0; }
     .file-item {
       display: flex; align-items: center; padding: 10px 16px;
@@ -80,22 +93,21 @@
     .file-item:last-child { border-bottom: none; }
     .file-item:hover { background-color: var(--hover-bg); }
     
-    .icon { margin-right: 12px; width: 20px; text-align: center; font-size: 1.2em; flex-shrink: 0;}
+    .icon { margin-right: 12px; width: 20px; text-align: center; flex-shrink: 0; }
     .file-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .file-name { color: var(--primary-color); font-weight: 500; }
     .file-path { font-size: 12px; color: #6a737d; margin-top: 2px; }
     .file-item:hover .file-name { text-decoration: underline; }
     .back-item { background-color: #fff9f9; font-weight: bold; }
 
-    /* === README 区域 === */
+    /* === README === */
     .readme-container { padding: 32px; border-top: 1px solid var(--border-color); }
     .readme-title {
       font-size: 12px; color: var(--text-secondary); text-transform: uppercase;
-      font-weight: 600; margin-bottom: 10px; padding-bottom: 10px;
-      border-bottom: 1px solid #eaecef;
+      font-weight: 600; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eaecef;
     }
 
-    /* === 预览界面样式 === */
+    /* === 预览视图 === */
     .preview-header-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .btn {
       padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px;
@@ -105,33 +117,46 @@
     .btn-primary { background-color: #2ea44f; color: white; border: 1px solid rgba(27,31,35,.15); }
     .btn-primary:hover { background-color: #2c974b; }
     
-    .preview-body { padding: 20px; overflow-x: auto; flex: 1; min-height: 400px; display: flex; flex-direction: column; }
-    .preview-image { max-width: 100%; display: block; margin: 0 auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .preview-body { padding: 20px; flex: 1; display: flex; flex-direction: column; min-height: 400px; }
+    .preview-image { max-width: 100%; display: block; margin: 0 auto; }
     .preview-code { background: #f6f8fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
-    
-    /* PDF iframe 样式 */
-    .pdf-frame {
-        width: 100%;
-        height: 80vh; /* 占据视口高度的 80% */
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
+    .pdf-frame { width: 100%; height: 80vh; border: 1px solid var(--border-color); border-radius: 4px; }
+
+    /* === 新增：页脚 === */
+    .page-footer {
+      margin-top: auto;
+      padding: 20px;
+      color: #6a737d;
+      font-size: 12px;
+      text-align: center;
     }
 
     .hidden { display: none !important; }
+
+    /* 移动端适配小调整 */
+    @media (max-width: 600px) {
+      .container { width: 100%; border: none; border-radius: 0; }
+      .search-wrapper { width: 150px; }
+    }
   </style>
 </head>
 <body>
 
+<!-- 头部标题 -->
+<header class="page-header">
+  <h1 class="page-title">ustCShame</h1>
+</header>
+
 <div class="container">
   
-  <!-- === 视图 1: 文件列表 / 搜索结果 === -->
+  <!-- 视图 1: 列表/搜索 -->
   <div id="view-list">
     <div class="header">
       <div class="breadcrumb-container" id="breadcrumb">
         <span>/</span>
       </div>
       <div class="search-wrapper">
-        <input type="text" id="searchInput" class="search-input" placeholder="全盘搜索..." autocomplete="off">
+        <input type="text" id="searchInput" class="search-input" placeholder="搜索文件..." autocomplete="off">
       </div>
     </div>
 
@@ -140,12 +165,12 @@
     </div>
 
     <div id="readmeBox" class="readme-container hidden">
-      <div class="readme-title">README.md (当前目录)</div>
+      <div class="readme-title">README.md</div>
       <div id="readmeFooter" class="markdown-body"></div>
     </div>
   </div>
 
-  <!-- === 视图 2: 文件预览 === -->
+  <!-- 视图 2: 预览 -->
   <div id="view-preview" class="hidden">
     <div class="header">
       <div class="preview-header-bar">
@@ -159,18 +184,31 @@
 
 </div>
 
+<!-- 页脚版权 -->
+<footer class="page-footer">
+  <p>&copy; <script>document.write(new Date().getFullYear());</script> ustCShame. All rights reserved.</p>
+  <p>仅供学习交流使用，请勿用于商业用途</p>
+</footer>
+
 <script>
   let rootTree = [];
-  let pathStack = [];
-  let currentBasePath = ''; 
+  let pathStack = []; // 依然存储对象栈，但主要依赖 URL Hash 来同步
   let isSearching = false;
 
   async function init() {
     try {
       const res = await fetch('tree.json');
       rootTree = await res.json();
-      renderList();
       
+      // 1. 初始化时，根据当前 Hash 恢复路径
+      syncStateFromHash();
+
+      // 2. 监听浏览器前进/后退/手动修改 URL
+      window.addEventListener('hashchange', () => {
+        syncStateFromHash();
+      });
+
+      // 3. 搜索框监听
       document.getElementById('searchInput').addEventListener('input', (e) => {
         const keyword = e.target.value.trim();
         if (keyword) {
@@ -178,16 +216,101 @@
           performSearch(keyword);
         } else {
           isSearching = false;
-          renderList();
+          // 退出搜索时，重新渲染当前 pathStack
+          renderList(); 
         }
       });
+
     } catch (e) {
       document.getElementById('fileList').innerHTML = `<div style="padding:20px; color:red;">无法加载 tree.json</div>`;
       console.error(e);
     }
   }
 
-  // --- 列表渲染逻辑 ---
+  // === 核心逻辑：Hash 路由同步 ===
+  
+  // 根据 URL Hash 重建 pathStack 并渲染
+  function syncStateFromHash() {
+    // 解码 hash (去掉 #)
+    const hash = decodeURIComponent(window.location.hash.slice(1)); 
+    
+    // 如果 hash 为空，说明是根目录
+    if (!hash) {
+      pathStack = [];
+      isSearching = false;
+      document.getElementById('searchInput').value = ''; // 清空搜索
+      exitPreview(false); // 确保退出预览模式
+      renderList();
+      return;
+    }
+
+    // 解析路径 'A/B/C' -> ['A', 'B', 'C']
+    const parts = hash.split('/').filter(p => p);
+    
+    // 尝试在 tree 中寻找这条路径
+    const newStack = [];
+    let currentNodes = rootTree;
+    let valid = true;
+
+    for (const part of parts) {
+      const foundNode = currentNodes.find(n => n.name === part && n.type === 'dir');
+      if (foundNode) {
+        newStack.push(foundNode);
+        currentNodes = foundNode.children || [];
+      } else {
+        valid = false;
+        break;
+      }
+    }
+
+    if (valid) {
+      pathStack = newStack;
+      isSearching = false; // 路径跳转会退出搜索模式
+      document.getElementById('searchInput').value = '';
+      exitPreview(false); // 退出预览
+      renderList();
+    } else {
+      // 路径不存在，回退到根目录并清除 hash
+      console.warn('Hash path not found:', hash);
+      window.location.hash = '';
+      // (hash change 会再次触发 syncStateFromHash -> 渲染根目录)
+    }
+  }
+
+  // === 导航操作 ===
+
+  // 进入文件夹 -> 只修改 Hash，触发 hashchange 事件来渲染
+  function enterFolder(node) {
+    // 临时构建一下新路径字符串，用于设置 hash
+    const currentPathNames = pathStack.map(n => n.name);
+    currentPathNames.push(node.name);
+    window.location.hash = currentPathNames.join('/');
+  }
+
+  // 返回上一级 -> 修改 Hash
+  function goBackFolder() {
+    // 方法 1: 使用 history.back() 体验最好
+    window.history.back();
+    
+    // 方法 2 (备选): 手动切 hash
+    // const newPath = pathStack.slice(0, -1).map(n => n.name).join('/');
+    // window.location.hash = newPath;
+  }
+
+  // 面包屑跳转
+  function jumpToBreadcrumb(index) {
+    // index 是目标层级的索引。0 表示第一层文件夹
+    // 根目录是特殊处理
+    if (index === -1) {
+      window.location.hash = '';
+    } else {
+      const newPath = pathStack.slice(0, index + 1).map(n => n.name).join('/');
+      window.location.hash = newPath;
+    }
+  }
+
+  // === 渲染逻辑 ===
+
   function renderList() {
     document.getElementById('view-list').classList.remove('hidden');
     document.getElementById('view-preview').classList.add('hidden');
@@ -201,10 +324,12 @@
     container.innerHTML = '';
 
     const nodes = (pathStack.length === 0) ? rootTree : (pathStack[pathStack.length - 1].children || []);
-    currentBasePath = pathStack.map(n => n.name).join('/') + (pathStack.length ? '/' : '');
+    // 获取当前路径前缀
+    const currentBasePath = pathStack.map(n => n.name).join('/') + (pathStack.length ? '/' : '');
 
     renderBreadcrumb();
 
+    // 返回按钮
     if (pathStack.length > 0) {
       const backDiv = document.createElement('div');
       backDiv.className = 'file-item back-item';
@@ -213,13 +338,14 @@
       container.appendChild(backDiv);
     }
 
+    // 排序
     const sortedNodes = [...nodes].sort((a, b) => {
       if (a.type === b.type) return a.name.localeCompare(b.name);
       return a.type === 'dir' ? -1 : 1;
     });
 
     if (sortedNodes.length === 0) {
-      container.innerHTML += `<div style="padding:20px; text-align:center; color:#999;">当前文件夹为空</div>`;
+      container.innerHTML += `<div style="padding:20px; text-align:center; color:#999;">空目录</div>`;
     }
 
     sortedNodes.forEach(node => {
@@ -227,11 +353,7 @@
       el.className = 'file-item';
       const icon = node.type === 'dir' ? '📁' : '📄';
       
-      el.innerHTML = `
-        <span class="icon">${icon}</span>
-        <div class="file-info">
-          <span class="file-name">${node.name}</span>
-        </div>`;
+      el.innerHTML = `<span class="icon">${icon}</span><div class="file-info"><span class="file-name">${node.name}</span></div>`;
 
       if (node.type === 'dir') {
         el.onclick = () => enterFolder(node);
@@ -241,10 +363,56 @@
       container.appendChild(el);
     });
 
-    handleReadmeInList(nodes);
+    handleReadmeInList(nodes, currentBasePath);
   }
 
-  // --- 搜索逻辑 ---
+  function renderBreadcrumb() {
+    const header = document.getElementById('breadcrumb');
+    header.innerHTML = '';
+    
+    const rootSpan = document.createElement('span');
+    rootSpan.textContent = '🏠 Root';
+    rootSpan.className = pathStack.length === 0 ? '' : 'breadcrumb-item';
+    if(pathStack.length > 0) rootSpan.onclick = () => jumpToBreadcrumb(-1);
+    header.appendChild(rootSpan);
+
+    pathStack.forEach((node, index) => {
+      const sep = document.createElement('span');
+      sep.className = 'breadcrumb-separator';
+      sep.textContent = '/';
+      header.appendChild(sep);
+
+      const span = document.createElement('span');
+      span.textContent = node.name;
+      if (index < pathStack.length - 1) {
+        span.className = 'breadcrumb-item';
+        span.onclick = () => jumpToBreadcrumb(index);
+      }
+      header.appendChild(span);
+    });
+  }
+
+  async function handleReadmeInList(nodes, basePath) {
+    const readmeNode = nodes.find(n => n.name.toLowerCase() === 'readme.md');
+    const readmeBox = document.getElementById('readmeBox');
+    const contentDiv = document.getElementById('readmeFooter');
+    
+    if (readmeNode) {
+      const path = basePath + readmeNode.name;
+      try {
+        const text = await fetch(path).then(r => r.text());
+        contentDiv.innerHTML = marked.parse(text);
+        readmeBox.classList.remove('hidden');
+      } catch (e) {
+        readmeBox.classList.add('hidden');
+      }
+    } else {
+      readmeBox.classList.add('hidden');
+      contentDiv.innerHTML = '';
+    }
+  }
+
+  // === 搜索逻辑 ===
   function performSearch(keyword) {
     const container = document.getElementById('fileList');
     const lowerKey = keyword.toLowerCase();
@@ -257,7 +425,7 @@
       nodes.forEach(node => {
         const fullPath = parentPath + node.name;
         if (node.name.toLowerCase().includes(lowerKey)) {
-          results.push({ node: node, path: fullPath, parents: [...parents] });
+          results.push({ node, path: fullPath, parents: [...parents] });
         }
         if (node.type === 'dir' && node.children) {
           traverse(node.children, fullPath + '/', [...parents, node]);
@@ -269,7 +437,7 @@
 
     container.innerHTML = '';
     if (results.length === 0) {
-      container.innerHTML = `<div style="padding:20px; text-align:center; color:#999;">无结果</div>`;
+      container.innerHTML = `<div style="padding:20px; text-align:center; color:#999;">无搜索结果</div>`;
       return;
     }
 
@@ -286,10 +454,9 @@
 
       if (res.node.type === 'dir') {
         el.onclick = () => {
-          document.getElementById('searchInput').value = '';
-          isSearching = false;
-          pathStack = [...res.parents, res.node];
-          renderList();
+          // 点击搜索结果的文件夹 -> 改变 hash -> 触发跳转
+          const pathNames = [...res.parents, res.node].map(n => n.name);
+          window.location.hash = pathNames.join('/');
         };
       } else {
         el.onclick = () => enterPreview(res.node, res.path);
@@ -298,67 +465,7 @@
     });
   }
 
-  // --- 辅助功能 ---
-  function renderBreadcrumb() {
-    const header = document.getElementById('breadcrumb');
-    header.innerHTML = '';
-    
-    const rootSpan = document.createElement('span');
-    rootSpan.textContent = '🏠 Root';
-    rootSpan.className = pathStack.length === 0 ? '' : 'breadcrumb-item';
-    if(pathStack.length > 0) rootSpan.onclick = () => { pathStack = []; renderList(); };
-    header.appendChild(rootSpan);
-
-    pathStack.forEach((node, index) => {
-      const sep = document.createElement('span');
-      sep.className = 'breadcrumb-separator';
-      sep.textContent = '/';
-      header.appendChild(sep);
-
-      const span = document.createElement('span');
-      span.textContent = node.name;
-      if (index < pathStack.length - 1) {
-        span.className = 'breadcrumb-item';
-        span.onclick = () => {
-          pathStack = pathStack.slice(0, index + 1);
-          renderList();
-        };
-      }
-      header.appendChild(span);
-    });
-  }
-
-  async function handleReadmeInList(nodes) {
-    const readmeNode = nodes.find(n => n.name.toLowerCase() === 'readme.md');
-    const readmeBox = document.getElementById('readmeBox');
-    const contentDiv = document.getElementById('readmeFooter');
-    
-    if (readmeNode) {
-      const path = currentBasePath + readmeNode.name;
-      try {
-        const text = await fetch(path).then(r => r.text());
-        contentDiv.innerHTML = marked.parse(text);
-        readmeBox.classList.remove('hidden');
-      } catch (e) {
-        readmeBox.classList.add('hidden');
-      }
-    } else {
-      readmeBox.classList.add('hidden');
-      contentDiv.innerHTML = '';
-    }
-  }
-
-  function enterFolder(node) {
-    pathStack.push(node);
-    renderList();
-  }
-
-  function goBackFolder() {
-    pathStack.pop();
-    renderList();
-  }
-
-  // --- 预览模式 (新增 PDF 处理) ---
+  // === 预览逻辑 ===
   async function enterPreview(node, fullPath) {
     document.getElementById('view-list').classList.add('hidden');
     document.getElementById('view-preview').classList.remove('hidden');
@@ -373,40 +480,33 @@
     
     if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
       container.innerHTML = `<img src="${fullPath}" class="preview-image">`;
-      
     } else if (['mp4', 'webm'].includes(ext)) {
       container.innerHTML = `<div style="text-align:center"><video controls style="max-width:100%"><source src="${fullPath}"></video></div>`;
-      
     } else if (ext === 'pdf') {
-      // === PDF 处理 ===
-      container.innerHTML = `
-        <iframe src="${fullPath}" class="pdf-frame" frameborder="0">
-            <p>您的浏览器不支持 iframe，请下载查看。</p>
-        </iframe>
-      `;
-      
+      container.innerHTML = `<iframe src="${fullPath}" class="pdf-frame" frameborder="0"><p>请下载查看。</p></iframe>`;
     } else if (['md', 'markdown'].includes(ext)) {
       try {
         const text = await fetch(fullPath).then(r => r.text());
         container.innerHTML = marked.parse(text);
       } catch (e) { container.innerHTML = '加载失败'; }
-      
-    } else if (['txt', 'js', 'json', 'css', 'html', 'py', 'java', 'c', 'cpp', 'h'].includes(ext)) {
+    } else if (['txt', 'js', 'json', 'css', 'html', 'py', 'java', 'c', 'cpp', 'h', 'go', 'rs'].includes(ext)) {
       try {
         const text = await fetch(fullPath).then(r => r.text());
         const safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         container.innerHTML = `<pre class="preview-code"><code>${safeText}</code></pre>`;
       } catch (e) { container.innerHTML = '加载失败'; }
-      
     } else {
-      container.innerHTML = `<div style="text-align:center; margin-top:50px; color:#666;"><p>此文件类型 (${ext}) 暂不支持在线预览</p></div>`;
+      container.innerHTML = `<div style="text-align:center; margin-top:50px; color:#666;"><p>此文件不支持在线预览，请下载。</p></div>`;
     }
   }
 
-  function exitPreview() {
+  function exitPreview(render = true) {
     document.getElementById('view-preview').classList.add('hidden');
     document.getElementById('previewContent').innerHTML = '';
-    document.getElementById('view-list').classList.remove('hidden');
+    // 如果是搜索导致的退出，可能不需要立即 render，由 hash change 处理
+    if (render) {
+      document.getElementById('view-list').classList.remove('hidden');
+    }
   }
 
   init();
